@@ -16,6 +16,7 @@ option (TOPAS_COVERAGE "Enable coverage analysis" OFF)
 option (TOPAS_MT "Enable multithreading support" ON)
 option (TOPAS_WITH_STATIC_GEANT4 "Link against static Geant4 libraries" OFF)
 option (TOPAS_WITH_PTL_GEANT4 "Link using PTL libraries from Geant4, no Visualization" OFF)
+option (TOPAS_WITH_CELERITAS "Enable GPU/CPU offload of EM transport with Celeritas (Ts/UseGPU)" OFF)
 
 option (TOPAS_INSTALL_EXAMPLES "Install example TOPAS files" ON)
 

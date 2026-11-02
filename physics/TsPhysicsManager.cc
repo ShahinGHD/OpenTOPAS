@@ -41,6 +41,7 @@
 #include "TsAutomaticImportanceSamplingManager.hh"
 #include "TsAutomaticImportanceSamplingParallelManager.hh"
 #include "TsPeriodicBoundaryConditionManager.hh"
+#include "TsGpuOffload.hh"
 
 #include "G4StepLimiterPhysics.hh"
 #include "G4EmParameters.hh"
@@ -209,6 +210,9 @@ G4VUserPhysicsList* TsPhysicsManager::GetPhysicsList() {
 	// Apply these after physics-list construction because some Geant4 physics
 	// constructors set the same singleton values in their constructors.
 	SetHadronicParameters();
+
+	// Optionally offload e-, e+ and gamma transport to Celeritas (Ts/UseGPU)
+	TsGpuOffload::RegisterWithPhysicsList(fPm, physicsList);
 
 	return physicsList;
 }

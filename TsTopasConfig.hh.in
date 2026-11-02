@@ -41,5 +41,6 @@
 
 #define TOPAS_TYPE "@TOPAS_TYPE@" 
 #cmakedefine TOPAS_MT 
+#cmakedefine TOPAS_WITH_CELERITAS
 
 #endif

@@ -58,6 +58,7 @@ set (TOPAS_Libs
 	graphics
 	material
 	physics
+	gpu
 	variance
 	filtering
 	scoring

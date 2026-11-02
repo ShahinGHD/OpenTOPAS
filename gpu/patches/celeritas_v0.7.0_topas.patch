@@ -1,0 +1,80 @@
+diff --git a/src/geocel/g4/GeantNavHistoryUpdater.cc b/src/geocel/g4/GeantNavHistoryUpdater.cc
+index 5eaeb2c50..8f311c36a 100644
+--- a/src/geocel/g4/GeantNavHistoryUpdater.cc
++++ b/src/geocel/g4/GeantNavHistoryUpdater.cc
+@@ -46,7 +46,19 @@ void GeantNavHistoryUpdater::operator()(Span<VolumeInstanceId const> stack,
+          ++level)
+     {
+         auto* pv = nav->GetVolume(level);
+-        if (!pv || mapper_.geant_to_id(*pv) != stack[level])
++        if (!pv)
++        {
++            break;
++        }
++        // Compare using the replica number recorded in the history, not the
++        // replica PV's current (thread-local, shared) copy number: a Geant4
++        // navigator call elsewhere may have changed it since this level was
++        // added, which would wrongly keep a stale history level
++        int const copy_no = nav->GetReplicaNo(level);
++        auto const vi = (pv->IsReplicated() && copy_no >= 0)
++                            ? mapper_.geant_to_id(*pv, copy_no)
++                            : mapper_.geant_to_id(*pv);
++        if (vi != stack[level])
+         {
+             break;
+         }
+diff --git a/src/orange/OrangeTrackView.hh b/src/orange/OrangeTrackView.hh
+index ddcad282b..accf84fca 100644
+--- a/src/orange/OrangeTrackView.hh
++++ b/src/orange/OrangeTrackView.hh
+@@ -289,12 +289,36 @@ CELER_FUNCTION OrangeTrackView& OrangeTrackView::operator=(
+     UnivId univ_id = orange_global_univ;
+     DaughterId daughter_id;
+     UnivLevelId ulev_id{0};
+-    do
++    bool bumped = false;
++    while (true)
+     {
+         TrackerVisitor visit_tracker{params_};
+         auto tinit = visit_tracker(
+             [&local](auto&& t) { return t.initialize(local); }, univ_id);
+ 
++        if (CELER_UNLIKELY((!tinit.volume || tinit.surface) && !bumped))
++        {
++            // The point lies on a surface (e.g. a track created by Geant4
++            // exactly on a boundary): nudge it a few tolerances along its
++            // direction and restart the search from the outermost universe
++            bumped = true;
++            auto const& tol = params_.scalars.tol;
++            real_type scale = 0;
++            for (auto v : init.pos)
++            {
++                scale = celeritas::max(scale, v < 0 ? -v : v);
++            }
++            real_type const bump = 10 * (tol.abs + tol.rel * scale);
++            for (auto i : range(3))
++            {
++                local.pos[i] = init.pos[i] + bump * init.dir[i];
++            }
++            local.dir = init.dir;
++            univ_id = orange_global_univ;
++            ulev_id = UnivLevelId{0};
++            continue;
++        }
++
+         if (CELER_UNLIKELY(!tinit.volume || tinit.surface))
+         {
+ #if !CELER_DEVICE_COMPILE
+@@ -337,7 +361,11 @@ CELER_FUNCTION OrangeTrackView& OrangeTrackView::operator=(
+             univ_id = daughter.univ_id;
+             ++ulev_id;
+         }
+-    } while (daughter_id);
++        if (!daughter_id)
++        {
++            break;
++        }
++    }
+ 
+     // Save found universe level
+     this->univ_level(ulev_id);

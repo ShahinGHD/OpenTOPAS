@@ -1,0 +1,35 @@
+# 6 MeV photon pencil beam on a 20 x 20 x 40 cm water phantom with 40 depth slices.
+# Run it twice, with Ts/UseGPU "True" and "False", and compare DoseZ.csv.
+
+b:Ts/UseGPU = "True"
+# CPU mode: small batches are fastest. On a GPU, raise this (see gpu/OpenTOPAS_GPU_install.md)
+i:Ts/GPU/MaxNumTracks = 64
+
+s:Ge/Phantom/Type     = "TsBox"
+s:Ge/Phantom/Parent   = "World"
+s:Ge/Phantom/Material = "G4_WATER"
+d:Ge/Phantom/HLX      = 10.0 cm
+d:Ge/Phantom/HLY      = 10.0 cm
+d:Ge/Phantom/HLZ      = 20.0 cm
+i:Ge/Phantom/ZBins    = 40
+d:Ge/Phantom/RotX     = 180. deg
+
+# The beam must start inside the World, not on its boundary
+d:Ge/BeamPosition/TransZ = 30. cm
+
+s:So/Demo/BeamParticle = "gamma"
+d:So/Demo/BeamEnergy   = 6. MeV
+u:So/Demo/BeamEnergySpread = 0.
+s:So/Demo/BeamPositionDistribution = "None"
+s:So/Demo/BeamAngularDistribution  = "None"
+i:So/Demo/NumberOfHistoriesInRun = 100000
+
+sv:Ph/Default/Modules = 1 "g4em-standard_opt0"
+
+s:Sc/DoseZ/Quantity   = "DoseToMedium"
+s:Sc/DoseZ/Component  = "Phantom"
+s:Sc/DoseZ/IfOutputFileAlreadyExists = "Overwrite"
+
+i:Ts/NumberOfThreads = 1
+i:Ts/ShowHistoryCountAtInterval = 0
+b:Ts/PauseBeforeQuit = "False"

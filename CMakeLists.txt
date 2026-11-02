@@ -45,6 +45,7 @@ include_directories (
 	${PROJECT_SOURCE_DIR}/filtering
 	${PROJECT_SOURCE_DIR}/chemistry
 	${PROJECT_SOURCE_DIR}/geometry
+	${PROJECT_SOURCE_DIR}/gpu
 	${PROJECT_SOURCE_DIR}/graphics
 	${PROJECT_SOURCE_DIR}/io
 	${PROJECT_SOURCE_DIR}/main
@@ -70,6 +71,7 @@ add_subdirectory (material)
 add_subdirectory (outcome)
 add_subdirectory (parameter)
 add_subdirectory (physics)
+add_subdirectory (gpu)
 add_subdirectory (primary)
 add_subdirectory (scoring)
 add_subdirectory (sequence)
@@ -97,6 +99,7 @@ target_link_libraries (topas
 	graphics
 	material
 	physics
+	gpu
 	variance
 	filtering
 	scoring

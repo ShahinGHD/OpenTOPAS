@@ -5,6 +5,7 @@ install (FILES
     ${CMAKE_CURRENT_BINARY_DIR}/filtering/libfiltering.a
     ${CMAKE_CURRENT_BINARY_DIR}/chemistry/libchemistry.a
     ${CMAKE_CURRENT_BINARY_DIR}/geometry/libgeometry.a
+    ${CMAKE_CURRENT_BINARY_DIR}/gpu/libgpu.a
     ${CMAKE_CURRENT_BINARY_DIR}/graphics/libgraphics.a
     ${CMAKE_CURRENT_BINARY_DIR}/io/libio.a
     ${CMAKE_CURRENT_BINARY_DIR}/main/libmain.a

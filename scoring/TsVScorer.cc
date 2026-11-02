@@ -58,6 +58,8 @@
 #include "G4ITTrackingInteractivity.hh"
 #include "G4DNAChemistryManager.hh"
 
+#include <cmath>
+
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
@@ -916,8 +918,14 @@ G4bool TsVScorer::IsSelectedSurface(G4Step* theStep)
 	}
 	//if (!fOnlyIncludeParticlesGoingOut) G4cout << "Allowed to score going in" << G4endl;
 
+	// Steps sent back from Celeritas (Ts/UseGPU) have no pre-step status. Celeritas
+	// marks them with an infinite safety, which Geant4 never sets; for those, rely
+	// on the geometric check below to find whether the step starts on the surface.
+	G4bool preStatusUnknown = std::isinf(theStep->GetPreStepPoint()->GetSafety());
+
 	// If we want to score particles that are going in, and the pre step is on a boundary, score this.
-	if (!fOnlyIncludeParticlesGoingOut && theStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary) {
+	if (!fOnlyIncludeParticlesGoingOut &&
+		(theStep->GetPreStepPoint()->GetStepStatus() == fGeomBoundary || preStatusUnknown)) {
 		// OK, we know the particle is going in to some surface. Now ask if it is the correct surface.
 		// Get the entry point's position in the local coordinate system of our sensitive volume
 		G4ThreeVector stppos = theStep->GetPreStepPoint()->GetPosition();
